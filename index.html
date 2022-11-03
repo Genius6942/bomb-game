@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKAAgMAAABxoyGwAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAADFBMVEUAAAAAAAD//4D////2rsv/AAAAAXRSTlMAQObYZgAAAAFiS0dEAxEMTPIAAAAHdElNRQflAhMVOwsDvNyrAAABxUlEQVR42u3XQQ6DMAxFQS7JJXvK7oqEoI1xkiIzbx35zzbLIkmSJEmSJEmSJEmSJEmSJEmSJEmSJEnSHVvDAQICAgICAgICAgIC9rO9ws1DAwICAgICAgICAgJWBV60NaABAQEBAQEBAQEBAQGn2o6ogICAgICAgICAgICAfwLmlYCAgICAgICAgICAVYEzbCklICAgICAgICAgICBgYB0QEBAQEBAQEBAQELCfbciXqlkJCAgICAgICAgICPh04JAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQGfADzaAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEvDcwzT89AAgICAgICAgICAgI+BuYUeZtgICAgICAgICAgICAUeX66fsTQEBAQEBAQEBAQEDACHC3flrDgWYbICAgICAgICAgIGB9YFx5sas2QEBAQEBAQEBAQMD6wMHKvA0QEBAQEBAQEBAQsD5wiLKnDRAQEBAQEBAQEBCwPnBTpqljbICAgICAgICAgICA9YE7apw1xQYICAgICAgICAgIWB+4KVubxwIEBAQEBAQEBAQEfAhQkiRJkiRJkiRJkiRJkiRJkiRJkiRJkqRob8lhbp11vZNqAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIxLTAyLTE5VDIxOjU4OjMxKzAwOjAwQ108lwAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMS0wMi0xOVQyMTo1NzozNiswMDowMAas4SgAAAAASUVORK5CYII="
+    />
+    <title>platfomer test</title>
+    <style>
+         .game {
+         	position: fixed;
+         	top: 0;
+         	left: 0;
+         }
+
+      .pointerlock {
+      	position: fixed;
+      	top: 0;
+      	left: 0;
+      	right: 0;
+      	bottom: 0;
+      	background: rgba(0, 0, 0, .3);
+      	backdrop-filter: blur(7px);
+      	display: flex;
+      	justify-content: center;
+      	align-items: center;
+      	font-size: 30px;
+				z-index: 1;
+      }
+    </style>
+    <script src="./plat.min.js"></script>
+  </head>
+  <body>
+    <script src="../eruda.js"></script>
+    <script>
+      try {
+        eruda.init();
+        if (localStorage.getItem("eruda-auto-show") === "1") eruda.show();
+        window.addEventListener("keydown", (e) => {
+          const { key, ctrlKey } = e;
+          if (key === "e" && ctrlKey) {
+            e.preventDefault();
+            if (localStorage.getItem("eruda-auto-show") === "1") {
+              localStorage.setItem("eruda-auto-show", "0");
+              eruda.hide();
+            } else {
+              localStorage.setItem("eruda-auto-show", "1");
+              eruda.show();
+            }
+          }
+        });
+      } catch {}
+    </script>
+    <div class="pointerlock">click to resume</div>
+    <script src="./main.js"></script>
+  </body>
+</html>
