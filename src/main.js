@@ -1,7 +1,3 @@
-// Create a renderer
-// This handles physics and rendering for you.
-const renderer = new Renderer();
-renderer.mount(document.body).enableFixedPosition().enablePhysics({});
 // renderer.forceNotInObject = false;
 
 const pointerLockEl = document.querySelector(".pointerlock");
@@ -27,18 +23,7 @@ document.addEventListener("pointerlockchange", () => {
 });
 
 // Create a player
-// Giving it a "color" property will make it render as that color.
-const player = new ControlledBody({
-  x: 30,
-  y: 30,
-  width: 30,
-  height: 30,
-  layer: 1,
-  color: "blue",
-  wallJump: true,
-  jumpVel: 17,
-  maxXSpeed: 7,
-});
+const player = new Player();
 
 // Add the player to the renderer's list of objects to draw / update
 renderer.add(player);
@@ -53,27 +38,12 @@ renderer.camera.lock(player);
 renderer.add(new StaticBody({ x: 0, y: 500, width: 300, height: 100, color: "black" }));
 renderer.add(new StaticBody({ x: 500, y: 800, width: 300, height: 100, color: "black" }));
 
-class Enemy extends PhysicalBody {
-  constructor(x, y) {
-    super({
-      x,
-      y,
-      width: 30,
-      height: 30,
-      color: "red",
-      update: () => {
-        if (this.y - this.height / 2 > renderer.height) {
-          this.v.y = 0;
-          this.v.x = 0;
-          this.x = 30;
-          this.y = 30;
-        }
-      },
-    });
-  }
-}
+const enemies = [
+  new Enemy({ x: 500, y: 0 }),
+  new Enemy({ x: 600, y: 0, mass: 3, maxHealth: 100, width: 60, height: 60 }),
+];
 
-renderer.add(new Enemy(500, 0));
+enemies.forEach((enemy) => renderer.add(enemy));
 
 const fps = 60;
 const msPerFrame = 1000 / fps;
@@ -193,7 +163,7 @@ const animationLoop = (time) => {
         if (
           renderer.objects.filter(
             (object) => object._randomId !== player._randomId && object.collides(big)
-          ).length < 1
+          ).length > 0
         )
           break;
 
@@ -210,12 +180,14 @@ const animationLoop = (time) => {
       points
         .slice(1)
         .forEach((linePoint, idx) => renderer.ctx.lineTo(linePoint[0], linePoint[1]));
-      renderer.ctx.stroke();
+      // renderer.ctx.stroke();
       renderer.ctx.restore();
     } catch (e) {
       console.error(e.message);
     }
   })();
+
+  player.drawStats(renderer.ctx);
 
   requestAnimationFrame(animationLoop);
 };

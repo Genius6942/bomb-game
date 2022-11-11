@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKAAgMAAABxoyGwAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAADFBMVEUAAAAAAAD//4D////2rsv/AAAAAXRSTlMAQObYZgAAAAFiS0dEAxEMTPIAAAAHdElNRQflAhMVOwsDvNyrAAABxUlEQVR42u3XQQ6DMAxFQS7JJXvK7oqEoI1xkiIzbx35zzbLIkmSJEmSJEmSJEmSJEmSJEmSJEmSJEnSHVvDAQICAgICAgICAgIC9rO9ws1DAwICAgICAgICAgJWBV60NaABAQEBAQEBAQEBAQGn2o6ogICAgICAgICAgICAfwLmlYCAgICAgICAgICAVYEzbCklICAgICAgICAgICBgYB0QEBAQEBAQEBAQELCfbciXqlkJCAgICAgICAgICPh04JAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQGfADzaAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEvDcwzT89AAgICAgICAgICAgI+BuYUeZtgICAgICAgICAgICAUeX66fsTQEBAQEBAQEBAQEDACHC3flrDgWYbICAgICAgICAgIGB9YFx5sas2QEBAQEBAQEBAQMD6wMHKvA0QEBAQEBAQEBAQsD5wiLKnDRAQEBAQEBAQEBCwPnBTpqljbICAgICAgICAgICA9YE7apw1xQYICAgICAgICAgIWB+4KVubxwIEBAQEBAQEBAQEfAhQkiRJkiRJkiRJkiRJkiRJkiRJkiRJkqRob8lhbp11vZNqAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIxLTAyLTE5VDIxOjU4OjMxKzAwOjAwQ108lwAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMS0wMi0xOVQyMTo1NzozNiswMDowMAas4SgAAAAASUVORK5CYII="
+    />
+    <title>platfomer test</title>
+    <style>
+         .pointerlock {
+         	position: fixed;
+         	top: 0;
+         	left: 0;
+         	right: 0;
+         	bottom: 0;
+         	background: rgba(0, 0, 0, .3);
+         	backdrop-filter: blur(7px);
+         	display: flex;
+         	justify-content: center;
+         	align-items: center;
+         	font-size: 30px;
+      z-index: 1;
+         }
+    </style>
+    <script src="../../tailwind.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="flex m-0 h-screen">
+    <script src="../lib/eruda.js"></script>
+    <script>
+      try {
+        eruda.init();
+        if (localStorage.getItem("eruda-auto-show") === "1") eruda.show();
+        window.addEventListener("keydown", (e) => {
+          const { key, ctrlKey } = e;
+          if (key === "e" && ctrlKey) {
+            e.preventDefault();
+            if (localStorage.getItem("eruda-auto-show") === "1") {
+              localStorage.setItem("eruda-auto-show", "0");
+              eruda.hide();
+            } else {
+              localStorage.setItem("eruda-auto-show", "1");
+              eruda.show();
+            }
+          }
+        });
+      } catch {}
+    </script>
+    <div class="game relative flex-grow">
+      <div class="pointerlock hidden">click to resume</div>
+      <div
+        class="fps absolute bottom-6 left-6 rounded-full p-4 bg-black text-white text-xl"
+      >
+        fps
+      </div>
+    </div>
+    <div class="editor w-96 border-l-2 border-black p-3">
+      <button class="run rounded-full bg-black text-white p-3 px-6">Run</button>
+      Blocks
+      <div class="blocks grid gap-4 grid-cols-4"></div>
+    </div>
+    <div
+      class="fixed top-0 left-0 right-0 bottom-0 bg-black z-10 flex justify-center items-center"
+    >
+      <div class="container w-[75vw] h-48 border-white border-8 relative">
+        <div class="loading h-full bg-white" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <script src="../lib/plat.js"></script>
+    <script src="../src/setup.js"></script>
+    <script src="../src/bomb.js"></script>
+    <script src="../src/enemy.js"></script>
+    <script src="../src/player.js"></script>
+		<script src="../src/spike.js"></script>
+    <script src="../lib/imageProgressLoader.js"></script>
+    <script src="./main.js"></script>
+    <script src="./editor.js"></script>
+  </body>
+</html>

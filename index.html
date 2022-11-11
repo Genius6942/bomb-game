@@ -10,33 +10,35 @@
     />
     <title>platfomer test</title>
     <style>
-         .game {
-         	position: fixed;
-         	top: 0;
-         	left: 0;
-         }
+           .game {
+           	position: fixed;
+           	top: 0;
+           	left: 0;
+           }
 
-      .pointerlock {
-      	position: fixed;
-      	top: 0;
-      	left: 0;
-      	right: 0;
-      	bottom: 0;
-      	background: rgba(0, 0, 0, .3);
-      	backdrop-filter: blur(7px);
-      	display: flex;
-      	justify-content: center;
-      	align-items: center;
-      	font-size: 30px;
-				z-index: 1;
-      }
+        .pointerlock {
+        	position: fixed;
+        	top: 0;
+        	left: 0;
+        	right: 0;
+        	bottom: 0;
+        	background: rgba(0, 0, 0, .3);
+        	backdrop-filter: blur(7px);
+        	display: flex;
+        	justify-content: center;
+        	align-items: center;
+        	font-size: 30px;
+      z-index: 1;
+        }
     </style>
-    <script src="./lib/plat.js"></script>
-    <script src="./src/setup.js"></script>
-		<script src="./src/bomb.js"></script>
   </head>
   <body>
-    <script src="../eruda.js"></script>
+    <script src="./lib/eruda.js"></script>
+    <script src="./lib/plat.js"></script>
+    <script src="./src/setup.js"></script>
+    <script src="./src/bomb.js"></script>
+    <script src="./src/enemy.js"></script>
+    <script src="./src/player.js"></script>
     <script>
       try {
         eruda.init();
@@ -56,7 +58,9 @@
         });
       } catch {}
     </script>
-    <div class="pointerlock">click to resume</div>
-    <script src="./src/main.js"></script>  
+    <div class="game">
+      <div class="pointerlock">click to resume</div>
+    </div>
+    <script src="./src/main.js"></script>
   </body>
 </html>

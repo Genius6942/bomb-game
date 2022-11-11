@@ -71,6 +71,7 @@ declare namespace plat {
       layer,
       mass,
       interactsWithPhysicalBodies,
+      friction,
       render,
       update,
     }: {
@@ -84,6 +85,7 @@ declare namespace plat {
       layer?: number;
       mass?: number;
       interactsWithPhysicalBodies?: boolean;
+      friction?: number;
       render?: emptyRenderFunction | null;
       update?: (multiplier: number, self: PhysicalBody) => void;
     });
@@ -211,16 +213,18 @@ declare namespace plat {
     };
     camera: Camera;
     forceNotInObject: boolean;
+    private beforeRenderFuncs;
     constructor();
+    beforeRender(func: () => void): this;
     /**
      * Makes images not blur when scaled
      */
     enablePixelated(): this;
-    enablePhysics({ gravity }: { gravity?: number | undefined }): void;
+    enablePhysics({ gravity }: { gravity?: number | undefined }): this;
     enableFixedPosition(): this;
-    resize(): void;
+    resize(): this;
     add(object: GameObject): GameObject;
-    destroy(item: GameObject | number): void;
+    destroy(item: GameObject | number): number | GameObject;
     /**
      * Mounts renderer to the dom
      */

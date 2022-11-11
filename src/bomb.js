@@ -1,11 +1,11 @@
 class ExplosionParticle extends PhysicalBody {
-  constructor(x, y, velocity, angle, size) {
+  constructor(x, y, velocity, angle, size, color = "yellow") {
     super({
       x,
       y,
       width: size,
       height: size,
-      color: "yellow",
+      color: color,
       update: (multiplier) => {
         this.width -= this.shrinkSpeed;
         this.height -= this.shrinkSpeed;
@@ -28,12 +28,19 @@ class ExplosionParticle extends PhysicalBody {
 
 const random = (min, max) => Math.random() * (max - min) + min;
 
-const explode = (x, y, particles) => {
+const explode = (x, y, particles, color = "yellow") => {
   Array(particles)
     .fill()
     .map(() =>
       renderer.add(
-        new ExplosionParticle(x, y, random(10, 20), random(0, Math.PI * 2), random(7, 12))
+        new ExplosionParticle(
+          x,
+          y,
+          random(10, 20),
+          random(0, Math.PI * 2),
+          random(7, 12),
+          color
+        )
       )
     );
 };
@@ -59,12 +66,16 @@ class Bomb extends PhysicalBody {
               );
               if (distance > this.maxExplosionDistance) return;
               const force =
-                ((this.maxExplosionDistance - distance) / this.maxExplosionDistance) *
-                this.force;
+                (((this.maxExplosionDistance - distance) / this.maxExplosionDistance) *
+                  this.force) /
+                object.mass;
               const angle = Math.atan2(object.x - this.x, object.y - this.y);
 
               object.v.x += Math.sin(angle) * force;
               object.v.y += Math.cos(angle) * force;
+              if (object instanceof Enemy || object instanceof Player) {
+                object.takeDamage(force * object.mass);
+              }
             });
             explode(this.x, this.y, 30);
             return;
@@ -104,14 +115,20 @@ const addBomb = (bomb) => {
 };
 
 const cursor = { x: 0, y: 0 };
-window.addEventListener("mousemove", ({ movementX, movementY }) => {
-  cursor.x += movementX;
-  cursor.y += movementY;
+window.addEventListener("mousemove", ({ movementX, movementY, clientX, clientY }) => {
+  if (pointerLocked) {
+    cursor.x += movementX;
+    cursor.y += movementY;
+  } else {
+    cursor.x = clientX;
+    cursor.y = clientY;
+  }
   cursor.x = Math.max(0, Math.min(renderer.width, cursor.x));
   cursor.y = Math.max(0, Math.min(renderer.height, cursor.y));
 });
 
-window.addEventListener("mousedown", () => {
+renderer.addEventListener("mousedown", () => {
+  if (!pointerLocked) return;
   try {
     const bombSpeed = 20;
     const angle = Math.atan2(
