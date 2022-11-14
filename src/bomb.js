@@ -45,14 +45,41 @@ const explode = (x, y, particles, color = "yellow") => {
     );
 };
 
+const numOfBombImages = 10;
+
+const sourceX = 34;
+const sourceY =  38;
+const sourceWidth = 30;
+const sourceHeight = 50;
+
 class Bomb extends PhysicalBody {
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} vx 
+   * @param {number} vy 
+   * @param {number} damage 
+   */
   constructor(x, y, vx, vy, damage = 3) {
     super({
       x,
       y,
       width: 20,
       height: 20,
-      color: "red",
+      image: images.bomb_1,
+      render: (ctx) => {
+        ctx.drawImage(
+          this.image,
+          sourceX,
+          sourceY,
+          sourceWidth,
+          sourceHeight,
+          -this.width / 2,
+          -this.height / 2,
+          this.width,
+          this.height
+        );
+      },
       update: (multiplier) => {
         this.ticks += multiplier;
         const rounded = Math.round(this.ticks);
@@ -90,6 +117,8 @@ class Bomb extends PhysicalBody {
             this.color = "red";
           }
         }
+        this.bombImage++;
+        this.image = images[`bomb_${this.bombImage % numOfBombImages + 1}`];
       },
     });
     this.damage = damage;
@@ -102,6 +131,8 @@ class Bomb extends PhysicalBody {
     this.flashLength = 10;
     this.force = 12;
     this.maxExplosionDistance = 300;
+
+    this.bombImage = 1;
   }
 }
 
@@ -137,7 +168,7 @@ renderer.addEventListener("mousedown", () => {
     );
     const vx = Math.cos(angle) * bombSpeed;
     const vy = Math.sin(angle) * bombSpeed;
-    addBomb(new Bomb(player.x, player.y, vx, vy));
+    addBomb(new Bomb(player.x, player.y, vx, vy, images));
   } catch (e) {
     console.error(e.message);
   }

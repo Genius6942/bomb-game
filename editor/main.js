@@ -32,73 +32,76 @@ let player;
  * @type {Enemy[]}
  */
 let enemies = [];
+
+let images = {
+  bg: "/img/bg_blue.png",
+
+  // blocks
+  block_snow_left: "/img/block_snow_2_left@3x.png",
+  block_snow_mid: "/img/block_snow_2_mid_3@3x.png",
+  block_snow_right: "/img/block_snow_2_right@3x.png",
+  block_snow_single: "/img/block_snow_2_single@3x.png",
+  block_ground_single: "/img/block_ground_00_single@3x.png",
+  block_ground_top_left: "/img/block_ground_01_top_left@3x.png",
+  block_ground_top_mid: "/img/block_ground_02_top_mid@3x.png",
+  block_ground_top_right: "/img/block_ground_03_top_right@3x.png",
+  block_ground_mid_left: "/img/block_ground_04_mid_left@3x.png",
+  block_ground_mid: "/img/block_ground_05_mid@3x.png",
+  block_ground_mid_right: "/img/block_ground_06_mid_right@3x.png",
+  block_ground_bottom_left: "/img/block_ground_7_bottom_left@3x.png",
+  block_ground_bottom_mid: "/img/block_ground_08_bottom_mid@3x.png",
+  block_ground_bottom_right: "/img/block_ground_09_bottom_right@3x.png",
+  block_ground_top_bottom: "/img/block_ground_10_top_bottom@3x.png",
+  block_ground_left_right: "/img/block_ground_11_left_right@3x.png",
+  block_ground_left: "/img/block_ground_12_left@3x.png",
+  block_ground_right: "/img/block_ground_12_right@3x.png",
+  block_ground_top: "/img/block_ground_13_top@3x.png",
+  block_ground_bottom: "/img/block_ground_14_bottom@3x.png",
+
+  // player
+  player_die_1: "/img/player/penguin_die01@2x.png",
+  player_die_2: "/img/player/penguin_die02@2x.png",
+  player_die_3: "/img/player/penguin_die03@2x.png",
+  player_die_4: "/img/player/penguin_die04@2x.png",
+  player_hurt: "/img/player/penguin_hurt@2x.png",
+  player_jump_1: "/img/player/penguin_jump01@2x.png",
+  player_jump_2: "/img/player/penguin_jump02@2x.png",
+  player_jump_3: "/img/player/penguin_jump03@2x.png",
+  player_slide_1: "/img/player/penguin_slide01@2x.png",
+  player_slide_2: "/img/player/penguin_slide02@2x.png",
+  player_walk_1: "/img/player/penguin_walk01@2x.png",
+  player_walk_2: "/img/player/penguin_walk02@2x.png",
+  player_walk_3: "/img/player/penguin_walk03@2x.png",
+  player_walk_4: "/img/player/penguin_walk04@2x.png",
+
+  // bomb
+  bomb_1: "/img/bomb/bomb_1.png",
+  bomb_2: "/img/bomb/bomb_2.png",
+  bomb_3: "/img/bomb/bomb_3.png",
+  bomb_4: "/img/bomb/bomb_4.png",
+  bomb_5: "/img/bomb/bomb_5.png",
+  bomb_6: "/img/bomb/bomb_6.png",
+  bomb_7: "/img/bomb/bomb_7.png",
+  bomb_8: "/img/bomb/bomb_8.png",
+  bomb_9: "/img/bomb/bomb_9.png",
+  bomb_10: "/img/bomb/bomb_10.png",
+
+  // spikes
+  spike_left: "/img/spike/spike_left.png",
+  spike_down: "/img/spike/spike_down.png",
+  spike_up: "/img/spike/spike_up.png",
+  spike_right: "/img/spike/spike_right.png",
+};
 loadImages(
-  {
-    bg: "/img/bg_blue.png",
-
-    // blocks
-    block_snow_left: "/img/block_snow_2_left@3x.png",
-    block_snow_mid: "/img/block_snow_2_mid_3@3x.png",
-    block_snow_right: "/img/block_snow_2_right@3x.png",
-    block_snow_single: "/img/block_snow_2_single@3x.png",
-    block_ground_single: "/img/block_ground_00_single@3x.png",
-    block_ground_top_left: "/img/block_ground_01_top_left@3x.png",
-    block_ground_top_mid: "/img/block_ground_02_top_mid@3x.png",
-    block_ground_top_right: "/img/block_ground_03_top_right@3x.png",
-    block_ground_mid_left: "/img/block_ground_04_mid_left@3x.png",
-    block_ground_mid: "/img/block_ground_05_mid@3x.png",
-    block_ground_mid_right: "/img/block_ground_06_mid_right@3x.png",
-    block_ground_bottom_left: "/img/block_ground_7_bottom_left@3x.png",
-    block_ground_bottom_mid: "/img/block_ground_08_bottom_mid@3x.png",
-    block_ground_bottom_right: "/img/block_ground_09_bottom_right@3x.png",
-    block_ground_top_bottom: "/img/block_ground_10_top_bottom@3x.png",
-    block_ground_left_right: "/img/block_ground_11_left_right@3x.png",
-    block_ground_left: "/img/block_ground_12_left@3x.png",
-    block_ground_right: "/img/block_ground_12_right@3x.png",
-    block_ground_top: "/img/block_ground_13_top@3x.png",
-    block_ground_bottom: "/img/block_ground_14_bottom@3x.png",
-
-    // player
-    player_die_1: "/img/player/penguin_die01@2x.png",
-    player_die_2: "/img/player/penguin_die02@2x.png",
-    player_die_3: "/img/player/penguin_die03@2x.png",
-    player_die_4: "/img/player/penguin_die04@2x.png",
-    player_hurt: "/img/player/penguin_hurt@2x.png",
-    player_jump_1: "/img/player/penguin_jump01@2x.png",
-    player_jump_2: "/img/player/penguin_jump02@2x.png",
-    player_jump_3: "/img/player/penguin_jump03@2x.png",
-    player_slide_1: "/img/player/penguin_slide01@2x.png",
-    player_slide_2: "/img/player/penguin_slide02@2x.png",
-    player_walk_1: "/img/player/penguin_walk01@2x.png",
-    player_walk_2: "/img/player/penguin_walk02@2x.png",
-    player_walk_3: "/img/player/penguin_walk03@2x.png",
-    player_walk_4: "/img/player/penguin_walk04@2x.png",
-
-    // bomb
-    bomb_1: "/img/bomb/bomb_1.png",
-    bomb_2: "/img/bomb/bomb_2.png",
-    bomb_3: "/img/bomb/bomb_3.png",
-    bomb_4: "/img/bomb/bomb_4.png",
-    bomb_5: "/img/bomb/bomb_5.png",
-    bomb_6: "/img/bomb/bomb_6.png",
-    bomb_7: "/img/bomb/bomb_7.png",
-    bomb_8: "/img/bomb/bomb_8.png",
-    bomb_9: "/img/bomb/bomb_9.png",
-    bomb_10: "/img/bomb/bomb_10.png",
-
-    // spikes
-    spike_left: "/img/spike/spike_left.png",
-    spike_down: "/img/spike/spike_down.png",
-    spike_up: "/img/spike/spike_up.png",
-    spike_right: "/img/spike/spike_right.png",
-  },
+  images,
   (loaded, total) => {
     console.log((loaded / total) * 100, "% complete");
     document.querySelector(".loading").style.width =
       ((loaded / total) * 100).toString() + "%";
   }
 )
-  .then((images) => {
+  .then((imgs) => {
+    images = imgs
     document.querySelector(".loading").parentElement.parentElement.style.display = "none";
 
     // Create a player
