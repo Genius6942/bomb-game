@@ -10,23 +10,46 @@
     />
     <title>platfomer test</title>
     <style>
-         .pointerlock {
-         	position: fixed;
-         	top: 0;
-         	left: 0;
-         	right: 0;
-         	bottom: 0;
-         	background: rgba(0, 0, 0, .3);
-         	backdrop-filter: blur(7px);
-         	display: flex;
-         	justify-content: center;
-         	align-items: center;
-         	font-size: 30px;
-      z-index: 1;
-         }
+      .pointerlock {
+      	position: fixed;
+      	top: 0;
+      	left: 0;
+      	right: 0;
+      	bottom: 0;
+      	background: rgba(0, 0, 0, .3);
+      	backdrop-filter: blur(7px);
+      	display: flex;
+      	justify-content: center;
+      	align-items: center;
+      	font-size: 30px;
+      	z-index: 1;
+      }
+
+      .jump {
+      	position: absolute;
+      	bottom: 20px;
+      	right: 30px;
+           width: 110px;
+           height: 110px;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           background-color: rgba(0, 0, 0, .3);
+           border-radius: 9999px;
+      	cursor: pointer;
+      	display: none;
+      }
+      .jump::after {
+       	  content: "";
+      	width: 70px;
+      	height: 100px;
+      	background-color: #333333;
+      	clip-path: polygon(0 45%, 50% 0, 100% 45%, 75% 45%, 75% 100%, 25% 100%, 25% 45%);
+      }
     </style>
     <script src="../../tailwind.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../lib/joystick.js"></script>
   </head>
   <body class="flex m-0 h-screen">
     <script src="../lib/eruda.js"></script>
@@ -49,13 +72,17 @@
         });
       } catch {}
     </script>
-    <div class="game relative flex-grow">
+    <div class="game relative flex-grow overflow-hidden">
       <div class="pointerlock hidden">click to resume</div>
       <div
         class="fps absolute bottom-6 left-6 rounded-full p-4 bg-black text-white text-xl"
       >
         fps
       </div>
+      <div class="jump"></div>
+      <canvas
+        class="mobile-shoot hidden absolute bottom-[20px] right-48 rounded-full bg-white"
+      ></canvas>
     </div>
     <div class="editor w-96 border-l-2 border-black p-3">
       <button class="run rounded-full bg-black text-white p-3 px-6">Run</button>
@@ -71,11 +98,12 @@
     </div>
 
     <script src="../lib/plat.js"></script>
+    <script src="../src/mobile.js"></script>
     <script src="../src/setup.js"></script>
     <script src="../src/bomb.js"></script>
     <script src="../src/enemy.js"></script>
     <script src="../src/player.js"></script>
-		<script src="../src/spike.js"></script>
+    <script src="../src/spike.js"></script>
     <script src="../lib/imageProgressLoader.js"></script>
     <script src="./main.js"></script>
     <script src="./editor.js"></script>

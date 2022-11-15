@@ -48,17 +48,17 @@ const explode = (x, y, particles, color = "yellow") => {
 const numOfBombImages = 10;
 
 const sourceX = 34;
-const sourceY =  38;
+const sourceY = 38;
 const sourceWidth = 30;
 const sourceHeight = 50;
 
 class Bomb extends PhysicalBody {
   /**
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} vx 
-   * @param {number} vy 
-   * @param {number} damage 
+   * @param {number} x
+   * @param {number} y
+   * @param {number} vx
+   * @param {number} vy
+   * @param {number} damage
    */
   constructor(x, y, vx, vy, damage = 3) {
     super({
@@ -118,7 +118,7 @@ class Bomb extends PhysicalBody {
           }
         }
         this.bombImage++;
-        this.image = images[`bomb_${this.bombImage % numOfBombImages + 1}`];
+        this.image = images[`bomb_${(this.bombImage % numOfBombImages) + 1}`];
       },
     });
     this.damage = damage;
@@ -147,7 +147,7 @@ const addBomb = (bomb) => {
 
 const cursor = { x: 0, y: 0 };
 window.addEventListener("mousemove", ({ movementX, movementY, clientX, clientY }) => {
-  if (pointerLocked) {
+  if (pointerLocked && !mobile) {
     cursor.x += movementX;
     cursor.y += movementY;
   } else {
@@ -158,10 +158,11 @@ window.addEventListener("mousemove", ({ movementX, movementY, clientX, clientY }
   cursor.y = Math.max(0, Math.min(renderer.height, cursor.y));
 });
 
+const bombSpeed = 20;
+
 renderer.addEventListener("mousedown", () => {
-  if (!pointerLocked) return;
+  if (!pointerLocked || mobile) return;
   try {
-    const bombSpeed = 20;
     const angle = Math.atan2(
       cursor.y - renderer.height / 2,
       cursor.x - renderer.width / 2
@@ -171,5 +172,140 @@ renderer.addEventListener("mousedown", () => {
     addBomb(new Bomb(player.x, player.y, vx, vy, images));
   } catch (e) {
     console.error(e.message);
+  }
+});
+
+window.addEventListener("load", () => {
+  if (mobile) {
+    /**
+     * @type {HTMLCanvasElement}
+     */
+    const dragCanvas = document.querySelector(".mobile-shoot");
+    dragCanvas.style.display = "block";
+    const shootCtx = dragCanvas.getContext("2d");
+
+    dragCanvas.width = 150;
+    dragCanvas.height = 150;
+
+    let left = dragCanvas.offsetLeft;
+    let top = dragCanvas.offsetTop;
+
+    window.addEventListener("resize", () => {
+      left = dragCanvas.offsetLeft;
+      top = dragCanvas.offsetTop;
+    });
+
+    let startLocation = { x: 0, y: 0 };
+    let endLocation = { ...startLocation };
+    let touchId = 0;
+    let grabbing = false;
+
+    /**
+     * @param {TouchEvent} e
+     */
+    const touchHandler = (e) => {
+      if (e.type === "touchstart") {
+        grabbing = true;
+        for (let touch of e.changedTouches) {
+          if (touch.target === dragCanvas) {
+            touchId = touch.identifier;
+            break;
+          }
+        }
+        startLocation.x = [...e.touches].find(
+          ({ identifier }) => identifier === touchId
+        ).clientX;
+        startLocation.y = [...e.touches].find(
+          ({ identifier }) => identifier === touchId
+        ).clientY;
+
+        endLocation = { ...startLocation };
+      } else if (e.type === "touchend") {
+        if (e.changedTouches[0].identifier !== touchId || !grabbing) return;
+        grabbing = false;
+
+        if (endLocation.x === startLocation.x && endLocation.y === startLocation.y) {
+          startLocation.x = left + dragCanvas.width / 2;
+          startLocation.y = top + dragCanvas.height / 2;
+        }
+
+        const angle = Math.atan2(
+          endLocation.y - startLocation.y,
+          endLocation.x - startLocation.x
+        );
+        const vx = Math.cos(angle) * bombSpeed;
+        const vy = Math.sin(angle) * bombSpeed;
+        addBomb(new Bomb(player.x, player.y, vx, vy, images));
+      } else if (e.type === "touchmove") {
+        if (grabbing) {
+          e.preventDefault();
+          let x = [...e.touches].find(({ identifier }) => identifier === touchId).clientX;
+          let y = [...e.touches].find(({ identifier }) => identifier === touchId).clientY;
+          endLocation = { x: x, y: y };
+        }
+      }
+    };
+
+    /**
+     * @param {MouseEvent} e
+     */
+    const mouseHandler = (e) => {
+      if (e.type === "mousedown") {
+        grabbing = true;
+        startLocation.x = e.clientX;
+        startLocation.y = e.clientY;
+
+        endLocation = { ...startLocation };
+      } else if (e.type === "mouseup") {
+        if (!grabbing) return;
+        grabbing = false;
+
+        if (endLocation.x === startLocation.x && endLocation.y === startLocation.y) {
+          startLocation.x = left + dragCanvas.width / 2;
+          startLocation.y = top + dragCanvas.height / 2;
+          console.log(
+            startLocation,
+            endLocation,
+            endLocation.x - startLocation.x,
+            endLocation.y - startLocation.y
+          );
+        }
+
+        const angle = Math.atan2(
+          endLocation.y - startLocation.y,
+          endLocation.x - startLocation.x
+        );
+        const vx = Math.cos(angle) * bombSpeed;
+        const vy = Math.sin(angle) * bombSpeed;
+        addBomb(new Bomb(player.x, player.y, vx, vy, images));
+      } else if (e.type === "mousemove") {
+        if (grabbing) {
+          e.preventDefault();
+          endLocation = { x: e.clientX, y: e.clientY };
+        }
+      }
+    };
+
+    dragCanvas.addEventListener("touchstart", touchHandler);
+    document.addEventListener("touchend", touchHandler);
+    document.addEventListener("touchmove", touchHandler);
+    dragCanvas.addEventListener("mousedown", mouseHandler);
+    document.addEventListener("mouseup", mouseHandler);
+    document.addEventListener("mousemove", mouseHandler);
+
+    const renderShootCanvas = () => {
+      shootCtx.clearRect(0, 0, dragCanvas.width, dragCanvas.height);
+
+      if (grabbing) {
+        shootCtx.beginPath();
+        shootCtx.moveTo(startLocation.x - left, startLocation.y - top);
+        shootCtx.lineTo(endLocation.x - left, endLocation.y - top);
+        shootCtx.stroke();
+      }
+
+      requestAnimationFrame(renderShootCanvas);
+    };
+
+    requestAnimationFrame(renderShootCanvas);
   }
 });

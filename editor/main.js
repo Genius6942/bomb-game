@@ -1,3 +1,9 @@
+if (mobile) {
+  document.querySelector(".jump").style.display = "flex";
+  document.querySelector(".editor").style.display = "none";
+  renderer.resize();
+}
+
 const pointerLockEl = document.querySelector(".pointerlock");
 document.querySelector(".run").addEventListener("click", ({ clientX, clientY }) => {
   if (pointerLocked) return;
@@ -8,8 +14,9 @@ document.querySelector(".run").addEventListener("click", ({ clientX, clientY }) 
 
 const blockSize = 64;
 
-let pointerLocked = false;
+let pointerLocked = mobile;
 document.addEventListener("pointerlockchange", () => {
+  if (mobile) return;
   if (document.pointerLockElement === renderer) {
     pointerLocked = true;
   } else {
@@ -92,16 +99,26 @@ let images = {
   spike_up: "/img/spike/spike_up.png",
   spike_right: "/img/spike/spike_right.png",
 };
-loadImages(
-  images,
-  (loaded, total) => {
-    console.log((loaded / total) * 100, "% complete");
-    document.querySelector(".loading").style.width =
-      ((loaded / total) * 100).toString() + "%";
-  }
-)
+loadImages(images, (loaded, total) => {
+  console.log((loaded / total) * 100, "% complete");
+  document.querySelector(".loading").style.width =
+    ((loaded / total) * 100).toString() + "%";
+})
   .then((imgs) => {
-    images = imgs
+    images = imgs;
+
+    // create a new joystick instance
+    const joystick = new joy.Joystick();
+
+    // add it to the dom tree
+    document.querySelector(".game").appendChild(joystick.dom);
+
+    // position it on the bottom left
+    joystick.dom.style.cssText = "position: fixed; bottom: 30px; left:30px;";
+    if (!mobile) {
+      joystick.dom.style.display = "none";
+    }
+
     document.querySelector(".loading").parentElement.parentElement.style.display = "none";
 
     // Create a player
@@ -110,6 +127,13 @@ loadImages(
 
     // Add the player to the renderer's list of objects to draw / update
     renderer.add(player);
+    renderer.camera.lock(player);
+    document
+      .querySelector(".jump")
+      .addEventListener("touchstart", player.jump.bind(player));
+    document
+      .querySelector(".jump")
+      .addEventListener("mousedown", player.jump.bind(player));
 
     // enable keyboard controls
     player.bindKeyboardControls({});
@@ -229,6 +253,21 @@ loadImages(
         fpsEl.innerHTML = avgFps.toString() + " fps";
       }
 
+      if (mobile) {
+        if (!joystick.grabber.grabbing) {
+          player.keys.left = false;
+          player.keys.right = false;
+        } else {
+          if (joystick.angle < Math.PI) {
+            player.keys.right = true;
+            player.keys.left = false;
+          } else {
+            player.keys.left = true;
+            player.keys.right = false;
+          }
+        }
+      }
+
       if (pointerLocked) renderer.update(multiplier);
 
       // respawn player if needed
@@ -245,6 +284,7 @@ loadImages(
       const ctx = renderer.ctx;
 
       pointerLocked &&
+        !mobile &&
         (async () => {
           // ---- draw cursor ----
           // setup
