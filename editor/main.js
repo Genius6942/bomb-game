@@ -1,7 +1,9 @@
 if (mobile) {
   document.querySelector(".jump").style.display = "flex";
   document.querySelector(".editor").style.display = "none";
-  renderer.addEventListener('touchstart', () => renderer.requestFullscreen());
+  renderer.addEventListener("touchstart", () => document.querySelector('.game').requestFullscreen());
+  renderer.addEventListener("click", () => document.querySelector('.game').requestFullscreen());
+  renderer.addEventListener("mousedown", () => document.querySelector('.game').requestFullscreen());
   renderer.resize();
 }
 
