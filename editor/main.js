@@ -1,6 +1,7 @@
 if (mobile) {
   document.querySelector(".jump").style.display = "flex";
   document.querySelector(".editor").style.display = "none";
+  renderer.requestFullscreen();
   renderer.resize();
 }
 

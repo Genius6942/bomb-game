@@ -4,3 +4,5 @@ const { Renderer, ControlledBody, StaticBody, PhysicalBody, GameObject, loadImag
 // This handles physics and rendering for you.
 const renderer = new Renderer();
 renderer.mount(document.querySelector(".game")).enablePhysics({}).resize();
+
+renderer.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });

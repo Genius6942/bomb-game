@@ -204,6 +204,7 @@ window.addEventListener("load", () => {
      * @param {TouchEvent} e
      */
     const touchHandler = (e) => {
+      // e.preventDefault();
       if (e.type === "touchstart") {
         grabbing = true;
         for (let touch of e.changedTouches) {
@@ -250,6 +251,7 @@ window.addEventListener("load", () => {
      * @param {MouseEvent} e
      */
     const mouseHandler = (e) => {
+      // e.preventDefault();
       if (e.type === "mousedown") {
         grabbing = true;
         startLocation.x = e.clientX;
@@ -286,12 +288,12 @@ window.addEventListener("load", () => {
       }
     };
 
-    dragCanvas.addEventListener("touchstart", touchHandler);
-    document.addEventListener("touchend", touchHandler);
-    document.addEventListener("touchmove", touchHandler);
-    dragCanvas.addEventListener("mousedown", mouseHandler);
-    document.addEventListener("mouseup", mouseHandler);
-    document.addEventListener("mousemove", mouseHandler);
+    dragCanvas.addEventListener("touchstart", touchHandler, { passive: false });
+    document.addEventListener("touchend", touchHandler, {passive: false});
+    document.addEventListener("touchmove", touchHandler, {passive: false});
+    dragCanvas.addEventListener("mousedown", mouseHandler, {passive: false});
+    document.addEventListener("mouseup", mouseHandler, {passive: false});
+    document.addEventListener("mousemove", mouseHandler, {passive: false});
 
     const renderShootCanvas = () => {
       shootCtx.clearRect(0, 0, dragCanvas.width, dragCanvas.height);
