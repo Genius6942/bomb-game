@@ -1,7 +1,15 @@
 if (mobile) {
   document.querySelector(".jump").style.display = "flex";
   document.querySelector(".editor").style.display = "none";
-  renderer.requestFullscreen();
+  renderer.addEventListener("touchstart", () =>
+    document.querySelector(".game").requestFullscreen()
+  );
+  renderer.addEventListener("click", () =>
+    document.querySelector(".game").requestFullscreen()
+  );
+  renderer.addEventListener("mousedown", () =>
+    document.querySelector(".game").requestFullscreen()
+  );
   renderer.resize();
 }
 
@@ -32,6 +40,9 @@ document.addEventListener("pointerlockchange", () => {
   }
 });
 
+const loadingBar = document.querySelector(".loading");
+const loadingStatus = document.querySelector(".loading-status");
+
 /**
  * @type {Player}
  */
@@ -41,30 +52,60 @@ let player;
  */
 let enemies = [];
 
+const pixelated = false;
+
+/**
+ * array of all the different elements in the level.
+ * @type {{x: number, y: number, img: string, type: string}[]}
+ */
+const level = [];
+
 let images = {
-  bg: "/img/bg_blue.png",
+  bg: "/img/other/bg_blue.png",
 
   // blocks
-  block_snow_left: "/img/block_snow_2_left@3x.png",
-  block_snow_mid: "/img/block_snow_2_mid_3@3x.png",
-  block_snow_right: "/img/block_snow_2_right@3x.png",
-  block_snow_single: "/img/block_snow_2_single@3x.png",
-  block_ground_single: "/img/block_ground_00_single@3x.png",
-  block_ground_top_left: "/img/block_ground_01_top_left@3x.png",
-  block_ground_top_mid: "/img/block_ground_02_top_mid@3x.png",
-  block_ground_top_right: "/img/block_ground_03_top_right@3x.png",
-  block_ground_mid_left: "/img/block_ground_04_mid_left@3x.png",
-  block_ground_mid: "/img/block_ground_05_mid@3x.png",
-  block_ground_mid_right: "/img/block_ground_06_mid_right@3x.png",
-  block_ground_bottom_left: "/img/block_ground_7_bottom_left@3x.png",
-  block_ground_bottom_mid: "/img/block_ground_08_bottom_mid@3x.png",
-  block_ground_bottom_right: "/img/block_ground_09_bottom_right@3x.png",
-  block_ground_top_bottom: "/img/block_ground_10_top_bottom@3x.png",
-  block_ground_left_right: "/img/block_ground_11_left_right@3x.png",
-  block_ground_left: "/img/block_ground_12_left@3x.png",
-  block_ground_right: "/img/block_ground_12_right@3x.png",
-  block_ground_top: "/img/block_ground_13_top@3x.png",
-  block_ground_bottom: "/img/block_ground_14_bottom@3x.png",
+  block_snow_left:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_left@3x.png",
+  block_snow_mid:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_mid_3@3x.png",
+  block_snow_right:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_right@3x.png",
+  block_snow_single:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_single@3x.png",
+  block_ground_single:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_00_single@3x.png",
+  block_ground_top_left:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_01_top_left@3x.png",
+  block_ground_top_mid:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_02_top_mid@3x.png",
+  block_ground_top_right:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_03_top_right@3x.png",
+  block_ground_mid_left:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_04_mid_left@3x.png",
+  block_ground_mid:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_05_mid@3x.png",
+  block_ground_mid_right:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_06_mid_right@3x.png",
+  block_ground_bottom_left:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_7_bottom_left@3x.png",
+  block_ground_bottom_mid:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_08_bottom_mid@3x.png",
+  block_ground_bottom_right:
+    "/img/block" +
+    (pixelated ? "_pixelated" : "") +
+    "/block_ground_09_bottom_right@3x.png",
+  block_ground_top_bottom:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_10_top_bottom@3x.png",
+  block_ground_left_right:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_11_left_right@3x.png",
+  block_ground_left:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_12_left@3x.png",
+  block_ground_right:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_12_right@3x.png",
+  block_ground_top:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_13_top@3x.png",
+  block_ground_bottom:
+    "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_14_bottom@3x.png",
 
   // player
   player_die_1: "/img/player/penguin_die01@2x.png",
@@ -81,6 +122,16 @@ let images = {
   player_walk_2: "/img/player/penguin_walk02@2x.png",
   player_walk_3: "/img/player/penguin_walk03@2x.png",
   player_walk_4: "/img/player/penguin_walk04@2x.png",
+
+  // enemy
+  enemy_slime_1: "/img/slime/ice_1.png",
+  enemy_slime_2: "/img/slime/ice_2.png",
+  enemy_slime_3: "/img/slime/ice_3.png",
+  enemy_slime_4: "/img/slime/ice_4.png",
+  enemy_slime_5: "/img/slime/ice_5.png",
+  enemy_slime_6: "/img/slime/ice_6.png",
+  enemy_slime_7: "/img/slime/ice_7.png",
+  enemy_slime_8: "/img/slime/ice_8.png",
 
   // bomb
   bomb_1: "/img/bomb/bomb_1.png",
@@ -99,15 +150,22 @@ let images = {
   spike_down: "/img/spike/spike_down.png",
   spike_up: "/img/spike/spike_up.png",
   spike_right: "/img/spike/spike_right.png",
+
+  // other misc things
+  checkpoint: "/img/other/checkpoint.png",
+  checkpointLocked: "/img/other/checkpoint_locked.png",
+  trash: "/img/other/trash.png",
 };
+const imageUrls = images;
 loadImages(images, (loaded, total) => {
-  console.log((loaded / total) * 100, "% complete");
   document.querySelector(".loading").style.width =
     ((loaded / total) * 100).toString() + "%";
 })
   .then((imgs) => {
     images = imgs;
-
+    return generateWorld(4000);
+  })
+  .then((map) => {
     // create a new joystick instance
     const joystick = new joy.Joystick();
 
@@ -128,7 +186,6 @@ loadImages(images, (loaded, total) => {
 
     // Add the player to the renderer's list of objects to draw / update
     renderer.add(player);
-    renderer.camera.lock(player);
     document
       .querySelector(".jump")
       .addEventListener("touchstart", player.jump.bind(player));
@@ -144,7 +201,7 @@ loadImages(images, (loaded, total) => {
       new StaticBody({ x: 0, y: 500, width: 300, height: 100, color: "black" })
     );
     renderer.add(
-      new StaticBody({ x: 500, y: 800, width: 300, height: 100, color: "black" })
+      new StaticBody({ x: 500, y: 700, width: 300, height: 100, color: "black" })
     );
 
     enemies = [
@@ -198,35 +255,7 @@ loadImages(images, (loaded, total) => {
       try {
         mouseDown = false;
         if (cursor.x === ogMousePoint.x && cursor.y === ogMousePoint.y) {
-          if (!["", "trash"].includes(getSelected())) {
-            const cursorXOnGrid =
-              cursor.x - blockSize / 2 - renderer.width / 2 + renderer.camera.pos.x;
-            const cursorYOnGrid =
-              cursor.y - blockSize / 2 - renderer.height / 2 + renderer.camera.pos.y;
-            const itemX = Math.round(cursorXOnGrid / blockSize);
-            const itemY = Math.round(cursorYOnGrid / blockSize);
-
-            if (getSelected().startsWith("block")) {
-              renderer.add(
-                new StaticBody({
-                  x: itemX * blockSize + blockSize / 2,
-                  y: itemY * blockSize + blockSize / 2,
-                  width: blockSize,
-                  height: blockSize,
-                  image: images[getSelected()],
-                })
-              );
-            } else if (getSelected().startsWith("spike")) {
-              renderer.add(
-                new Spike({
-                  x: itemX,
-                  y: itemY,
-                  dir: getSelected().slice(6),
-                  images,
-                })
-              );
-            }
-          }
+          addItem(getSelected());
         }
       } catch (e) {
         console.error(e);
@@ -269,15 +298,42 @@ loadImages(images, (loaded, total) => {
         }
       }
 
-      if (pointerLocked) renderer.update(multiplier);
+      // ------ add correct blocks to renderer -------
+      (() => {
+        // step 1 - clear blocks
+        renderer.objects = renderer.objects.filter(
+          (object) => object.constructor.name !== "StaticBody"
+        );
+        // step 2 - calculate boundaries
+        const margin = blockSize * 3;
+        const left = renderer.camera.pos.x - renderer.width / 2 - margin;
+        const top = renderer.camera.pos.y - renderer.height / 2 - margin;
+        const right = renderer.camera.pos.x + renderer.width / 2 + margin;
+        const bottom = renderer.camera.pos.y + renderer.height / 2 + margin;
 
-      // respawn player if needed
-      if (player.y - player.height / 2 > 4000) {
-        player.v.y = 0;
-        player.v.x = 0;
-        player.x = 30;
-        player.y = 30;
-      }
+        const blockLeft = Math.round(left / blockSize);
+        const blockTop = Math.round(top / blockSize);
+        const blockRight = Math.round(right / blockSize);
+        const blockBottom = Math.round(bottom / blockSize);
+
+        for (let x = Math.max(blockLeft, 0); x < Math.min(blockRight, 4000); x++) {
+          for (let y = Math.max(blockTop, 0); y < Math.min(blockBottom, 4000); y++) {
+            const val = map[x + y * 4000];
+            if (!val) continue;
+            renderer.add(
+              new StaticBody({
+                x: x * blockSize + blockSize / 2,
+                y: y * blockSize + blockSize / 2,
+                width: blockSize,
+                height: blockSize,
+                image: images["block_ground_" + val.image],
+              })
+            );
+          }
+        }
+      })();
+
+      if (pointerLocked) renderer.update(multiplier);
 
       // draw everything
       renderer.render();
@@ -418,6 +474,12 @@ loadImages(images, (loaded, total) => {
           if (selected.length === 0) return;
           const selectedImg = images[selected];
           if (!selectedImg) return;
+          if (selected === "trash") {
+            renderer.style.cursor = `url("/img/other/trash_cursor.png"), crosshair`;
+            return;
+          } else {
+            renderer.style.cursor = "auto";
+          }
           const cursorXOnGrid =
             cursor.x - blockSize / 2 - renderer.width / 2 + renderer.camera.pos.x;
           const cursorYOnGrid =

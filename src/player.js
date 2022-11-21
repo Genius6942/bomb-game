@@ -13,7 +13,7 @@ class Player extends ControlledBody {
       layer: 1,
       image: images.player_walk_1,
       wallJump: true,
-      jumpVel: 17,
+      jumpVel: 15.5,
       maxXSpeed: 7,
       render: (ctx) => {
         if (this.dir === 0) {
@@ -67,6 +67,8 @@ class Player extends ControlledBody {
     this.maxHealth = health;
     this.health = this.maxHealth;
     this.displayedHealth = this.health;
+
+    this.startPos = { x: this.x, y: this.y };
   }
 
   /**
@@ -124,6 +126,21 @@ class Player extends ControlledBody {
       renderer.destroy(this);
       enemies.splice(enemies.indexOf(this), 1);
       explode(this.x, this.y, this.maxHealth, "blue");
+      setTimeout(() => {
+        renderer.add(this);
+        this.health = this.maxHealth;
+        try {
+          const [checkpoint] = checkpoints.filter((checkpoint) => !checkpoint.locked);
+          this.x = checkpoint.x;
+          this.y = checkpoint.y;
+        } catch (e) {
+          this.x = this.startPos.x;
+          this.y = this.startPos.y;
+        }
+        this.v.x = 0;
+        this.v.y = 0;
+        renderer.camera.lock(this);
+      }, 2000);
     }
     this.health = Math.max(0, this.health);
     return this.health;

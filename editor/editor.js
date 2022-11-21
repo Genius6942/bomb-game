@@ -16,11 +16,17 @@ const initEditor = (images) => {
   const update = () => {
     document.querySelector(".editor .blocks").innerHTML = "";
     Object.keys(images).forEach((key) => {
-      if (key.startsWith("block") || key.startsWith("spike")) {
+      if (
+        key.startsWith("block") ||
+        key.startsWith("spike") ||
+        key === "checkpoint" ||
+        key === "trash"
+      ) {
         document.querySelector(".editor .blocks").appendChild(images[key]);
         images[key].className = `w-[${blockSize}px] h-[${blockSize}px] ${
           selected === key && "shadow-2xl rounded-md"
         }`;
+        images[key].title = key;
       }
     });
   };

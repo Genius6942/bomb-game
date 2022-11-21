@@ -75,9 +75,9 @@ class Bomb extends PhysicalBody {
           sourceWidth,
           sourceHeight,
           -this.width / 2,
-          -this.height / 2,
+          -this.height / 2 - ((sourceHeight % sourceWidth) / sourceWidth) * this.height,
           this.width,
-          this.height
+          (this.height * sourceHeight) / sourceWidth
         );
       },
       update: (multiplier) => {
@@ -289,11 +289,11 @@ window.addEventListener("load", () => {
     };
 
     dragCanvas.addEventListener("touchstart", touchHandler, { passive: false });
-    document.addEventListener("touchend", touchHandler, {passive: false});
-    document.addEventListener("touchmove", touchHandler, {passive: false});
-    dragCanvas.addEventListener("mousedown", mouseHandler, {passive: false});
-    document.addEventListener("mouseup", mouseHandler, {passive: false});
-    document.addEventListener("mousemove", mouseHandler, {passive: false});
+    document.addEventListener("touchend", touchHandler, { passive: false });
+    document.addEventListener("touchmove", touchHandler, { passive: false });
+    dragCanvas.addEventListener("mousedown", mouseHandler, { passive: false });
+    document.addEventListener("mouseup", mouseHandler, { passive: false });
+    document.addEventListener("mousemove", mouseHandler, { passive: false });
 
     const renderShootCanvas = () => {
       shootCtx.clearRect(0, 0, dragCanvas.width, dragCanvas.height);

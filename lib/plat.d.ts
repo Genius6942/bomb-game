@@ -23,6 +23,7 @@ declare namespace plat {
     color: string | null;
     layer: number;
     _randomId: number;
+    onCollide: (object: GameObject) => void;
     constructor({
       x,
       y,
@@ -34,7 +35,8 @@ declare namespace plat {
       layer,
       render,
       update,
-    }: {
+      onCollide,
+    }?: {
       x?: number;
       y?: number;
       rotation?: number;
@@ -45,9 +47,10 @@ declare namespace plat {
       layer?: number;
       render?: emptyRenderFunction | null;
       update?: Function;
+      onCollide?: (object: GameObject) => void;
     });
     _render(ctx: CanvasRenderingContext2D): void;
-    collides(object: rect): boolean;
+    	collides(object: rect): boolean;
   }
   //# sourceMappingURL=object.d.ts.map
 
@@ -74,7 +77,8 @@ declare namespace plat {
       friction,
       render,
       update,
-    }: {
+      onCollide,
+    }?: {
       x?: number;
       y?: number;
       rotation?: number;
@@ -88,6 +92,7 @@ declare namespace plat {
       friction?: number;
       render?: emptyRenderFunction | null;
       update?: (multiplier: number, self: PhysicalBody) => void;
+      onCollide?: (object: GameObject) => void;
     });
     applyFriction(multiplier: number): void;
   }
@@ -131,7 +136,8 @@ declare namespace plat {
       maxJumps,
       wallJump,
       wallPushOffSpeed,
-    }: {
+      onCollide,
+    }?: {
       x?: number;
       y?: number;
       rotation?: number;
@@ -148,6 +154,7 @@ declare namespace plat {
       maxJumps?: number;
       wallJump?: boolean;
       wallPushOffSpeed?: number;
+      onCollide?: (object: GameObject) => void;
     });
     getPreventFriction(): boolean;
     jump(): void;
@@ -155,7 +162,7 @@ declare namespace plat {
       wasd,
       arrowKeys,
       spaceJump,
-    }: {
+    }?: {
       wasd?: boolean | undefined;
       arrowKeys?: boolean | undefined;
       spaceJump?: boolean | undefined;
@@ -246,6 +253,7 @@ declare namespace plat {
       layer,
       render,
       update,
+      onCollide,
     }: {
       x?: number;
       y?: number;
@@ -257,6 +265,7 @@ declare namespace plat {
       layer?: number;
       render?: emptyRenderFunction | null;
       update?: Function;
+      onCollide?: (object: GameObject) => void;
     });
   }
 

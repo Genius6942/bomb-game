@@ -47,7 +47,7 @@
       	clip-path: polygon(0 45%, 50% 0, 100% 45%, 75% 45%, 75% 100%, 25% 100%, 25% 45%);
       }
     </style>
-    <script src="../../tailwind.js"></script>
+    <script src="../lib/tailwind.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../lib/joystick.js"></script>
   </head>
@@ -75,7 +75,7 @@
     <div class="game relative flex-grow overflow-hidden">
       <div class="pointerlock hidden">click to resume</div>
       <div
-        class="fps absolute bottom-6 left-6 rounded-full p-4 bg-black text-white text-xl"
+        class="fps select-none absolute bottom-6 left-6 rounded-full p-4 bg-black text-white text-xl"
       >
         fps
       </div>
@@ -90,11 +90,15 @@
       <div class="blocks grid gap-4 grid-cols-4"></div>
     </div>
     <div
-      class="fixed top-0 left-0 right-0 bottom-0 bg-black z-10 flex justify-center items-center"
+      class="fixed top-0 left-0 right-0 bottom-0 bg-black z-10 flex justify-center items-center flex-col"
     >
       <div class="container w-[75vw] h-48 border-white border-8 relative">
-        <div class="loading h-full bg-white" style="width: 0%"></div>
+        <div
+          class="loading h-full bg-white transition-all duration-200"
+          style="width: 0%"
+        ></div>
       </div>
+      <span class="loading-status text-white text-3xl">Loading assets...</span>
     </div>
 
     <script src="../lib/plat.js"></script>
@@ -104,6 +108,10 @@
     <script src="../src/enemy.js"></script>
     <script src="../src/player.js"></script>
     <script src="../src/spike.js"></script>
+    <script src="../src/checkpoint.js"></script>
+    <script src="../src/tools/collision.js"></script>
+    <script src="./generateWorld.js"></script>
+    <script src="./add.js"></script>
     <script src="../lib/imageProgressLoader.js"></script>
     <script src="./main.js"></script>
     <script src="./editor.js"></script>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Perlin noise</title>
+    <style>
+      .centerbox {
+        /* flexbox, por favor */
+        display: -webkit-box;
+        -webkit-box-orient: horizontal;
+        -webkit-box-pack: center;
+        -webkit-box-align: center;
+
+        display: -moz-box;
+        -moz-box-orient: horizontal;
+        -moz-box-pack: center;
+        -moz-box-align: center;
+
+        width: 100%;
+        height: 100%;
+        margin: 0; padding: 0;
+      }
+      body, html { width: 100%; height: 100%; padding: 0; margin: 0; }
+      canvas {
+        /* border-radius: 30px;  Border radiuses don't seem to work with putImageData */
+        box-shadow: 0 0 10px #777;
+        /* width: 1024px;
+        height: 768px; */
+      }
+      body {
+        background-color: #eee;
+      }
+    </style>
+    <script src="../lib/tailwind.js"></script>
+  </head>
+  <body>
+    <div
+      class="fixed top-0 left-0 right-0 bottom-0 bg-black z-10 flex justify-center items-center flex-col"
+    >
+      <div class="container w-[75vw] h-48 border-white border-8 relative">
+        <div
+          class="loading h-full bg-white transition-all duration-200"
+          style="width: 0%"
+        ></div>
+      </div>
+      <span class="loading-status text-white text-3xl">Generating world...</span>
+    </div>
+    <script src="../lib/eruda.js"></script>
+    <script>
+      try {
+        eruda.init();
+        if (localStorage.getItem("eruda-auto-show") === "1") eruda.show();
+        window.addEventListener("keydown", (e) => {
+          const { key, ctrlKey } = e;
+          if (key === "e" && ctrlKey) {
+            e.preventDefault();
+            if (localStorage.getItem("eruda-auto-show") === "1") {
+              localStorage.setItem("eruda-auto-show", "0");
+              eruda.hide();
+            } else {
+              localStorage.setItem("eruda-auto-show", "1");
+              eruda.show();
+            }
+          }
+        });
+      } catch {}
+    </script>
+    <script src="../lib/noise.js"></script>
+    <script src="../lib/plat.js"></script>
+    <script>
+      const {
+        Renderer,
+        ControlledBody,
+        StaticBody,
+        PhysicalBody,
+        GameObject,
+        loadImages,
+      } = plat;
+    </script>
+    <div class="centerbox"><canvas></canvas></div>
+    <script>
+      const pixelated = false;
+
+      let images = {
+        bg: "/img/other/bg_blue.png",
+
+        // blocks
+        block_snow_left:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_left@3x.png",
+        block_snow_mid:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_mid_3@3x.png",
+        block_snow_right:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_right@3x.png",
+        block_snow_single:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_snow_2_single@3x.png",
+        block_ground_single:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_00_single@3x.png",
+        block_ground_top_left:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_01_top_left@3x.png",
+        block_ground_top_mid:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_02_top_mid@3x.png",
+        block_ground_top_right:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_03_top_right@3x.png",
+        block_ground_mid_left:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_04_mid_left@3x.png",
+        block_ground_mid:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_05_mid@3x.png",
+        block_ground_mid_right:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_06_mid_right@3x.png",
+        block_ground_bottom_left:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_7_bottom_left@3x.png",
+        block_ground_bottom_mid:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_08_bottom_mid@3x.png",
+        block_ground_bottom_right:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_09_bottom_right@3x.png",
+        block_ground_top_bottom:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_10_top_bottom@3x.png",
+        block_ground_left_right:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_11_left_right@3x.png",
+        block_ground_left:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_12_left@3x.png",
+        block_ground_right:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_12_right@3x.png",
+        block_ground_top:
+          "/img/block" + (pixelated ? "_pixelated" : "") + "/block_ground_13_top@3x.png",
+        block_ground_bottom:
+          "/img/block" +
+          (pixelated ? "_pixelated" : "") +
+          "/block_ground_14_bottom@3x.png",
+
+        // player
+        player_die_1: "/img/player/penguin_die01@2x.png",
+        player_die_2: "/img/player/penguin_die02@2x.png",
+        player_die_3: "/img/player/penguin_die03@2x.png",
+        player_die_4: "/img/player/penguin_die04@2x.png",
+        player_hurt: "/img/player/penguin_hurt@2x.png",
+        player_jump_1: "/img/player/penguin_jump01@2x.png",
+        player_jump_2: "/img/player/penguin_jump02@2x.png",
+        player_jump_3: "/img/player/penguin_jump03@2x.png",
+        player_slide_1: "/img/player/penguin_slide01@2x.png",
+        player_slide_2: "/img/player/penguin_slide02@2x.png",
+        player_walk_1: "/img/player/penguin_walk01@2x.png",
+        player_walk_2: "/img/player/penguin_walk02@2x.png",
+        player_walk_3: "/img/player/penguin_walk03@2x.png",
+        player_walk_4: "/img/player/penguin_walk04@2x.png",
+
+        // enemy
+        enemy_slime_1: "/img/slime/ice_1.png",
+        enemy_slime_2: "/img/slime/ice_2.png",
+        enemy_slime_3: "/img/slime/ice_3.png",
+        enemy_slime_4: "/img/slime/ice_4.png",
+        enemy_slime_5: "/img/slime/ice_5.png",
+        enemy_slime_6: "/img/slime/ice_6.png",
+        enemy_slime_7: "/img/slime/ice_7.png",
+        enemy_slime_8: "/img/slime/ice_8.png",
+
+        // bomb
+        bomb_1: "/img/bomb/bomb_1.png",
+        bomb_2: "/img/bomb/bomb_2.png",
+        bomb_3: "/img/bomb/bomb_3.png",
+        bomb_4: "/img/bomb/bomb_4.png",
+        bomb_5: "/img/bomb/bomb_5.png",
+        bomb_6: "/img/bomb/bomb_6.png",
+        bomb_7: "/img/bomb/bomb_7.png",
+        bomb_8: "/img/bomb/bomb_8.png",
+        bomb_9: "/img/bomb/bomb_9.png",
+        bomb_10: "/img/bomb/bomb_10.png",
+
+        // spikes
+        spike_left: "/img/spike/spike_left.png",
+        spike_down: "/img/spike/spike_down.png",
+        spike_up: "/img/spike/spike_up.png",
+        spike_right: "/img/spike/spike_right.png",
+
+        // other misc things
+        checkpoint: "/img/other/checkpoint.png",
+        checkpointLocked: "/img/other/checkpoint_locked.png",
+        trash: "/img/other/trash.png",
+      };
+
+      const worker = new Worker("./noiseWorker.js");
+
+      const size = 4000;
+
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+      const renderNoise = async (noiseData, onProgress = (loaded, total) => {}) => {
+        loadingStatus.innerHTML = "Rendering world...";
+        const canvas = document.getElementsByTagName("canvas")[0];
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext("2d");
+
+        const image = ctx.createImageData(canvas.width, canvas.height);
+        const data = image.data;
+
+        const start = Date.now();
+        const updateStepCount = Math.floor(size / 100);
+
+        for (let x = 0; x < canvas.width; x++) {
+          if (x % updateStepCount === 0) {
+            onProgress(x, size);
+            await sleep(10);
+          }
+          for (let y = 0; y < canvas.height; y++) {
+            let value = noiseData[x + y * size];
+            if (!value) continue;
+            value *= 256;
+            var cell = (x + y * canvas.width) * 4;
+            data[cell] = data[cell + 1] = data[cell + 2] = value;
+            data[cell] += Math.max(0, (25 - value) * 8);
+            data[cell + 3] = 255; // alpha.
+          }
+        }
+
+        ctx.putImageData(image, 0, 0);
+
+        const end = Date.now();
+        if (console) {
+          console.log("Rendered in " + (end - start) + " ms");
+        }
+      };
+
+      const loadingBar = document.querySelector(".loading");
+      const loadingStatus = document.querySelector(".loading-status");
+      worker.addEventListener("error", ({ message, lineno, colno }) => {
+        console.error(
+          "Worker Error:",
+          message,
+          "at line ",
+          lineno.toString() + ":" + colno.toString()
+        );
+      });
+
+      const finalData = [];
+
+      (async () => {
+        worker.addEventListener("message", async ({ data }) => {
+          if (data.type === "progress") {
+            loadingBar.style.width = (data.value * 100).toString() + "%";
+            loadingStatus.innerHTML =
+              data.job === "generate"
+                ? "Generating world..."
+                : data.job === "condense"
+                ? "Compressing world..."
+                : data.job === "process"
+                ? "Processing world..."
+                : data.job === "load"
+                ? "Verifying file intergity..."
+                : "Finishing up...";
+            if (data.job === "load") {
+              finalData.push(...data.value);
+            }
+          } else if (data.type === "complete") {
+            console.log("complete");
+            await sleep(1000);
+            try {
+              await renderNoise(
+                finalData,
+                (loaded, total) =>
+                  (loadingBar.style.width = ((loaded / total) * 100).toString() + "%")
+              );
+              window.data = finalData;
+              loadingBar.parentElement.parentElement.style.display = "none";
+            } catch (e) {
+              console.error(e);
+            }
+          } else if (data.type === "error") {
+            console.error(data.value);
+          }
+        });
+
+        loadingStatus.innerHTML = "Loading assets";
+        images = await loadImages(
+          images,
+          (loaded, total) =>
+            (loadingBar.style.width = ((loaded / total) * 100).toString() + "%")
+        );
+
+        worker.postMessage([size, size]);
+      })();
+    </script>
+  </body>
+</html>

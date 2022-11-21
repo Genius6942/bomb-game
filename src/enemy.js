@@ -1,15 +1,20 @@
 class Enemy extends PhysicalBody {
-  constructor({x = 0, y = 0, mass = 1, maxHealth = 15, width = 30, height = 30}) {
+  constructor({ x = 0, y = 0, mass = 1, maxHealth = 15, width = 30, height = 30 }) {
     super({
       x,
       y,
       width,
       height,
-      color: "red",
-			mass,
+      image: images.enemy_slime_1,
+      mass,
       render: (ctx) => {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+        ctx.drawImage(
+          this.image,
+          -this.width / 2,
+          -this.height / 2,
+          this.width,
+          this.height
+        );
 
         // health bar
         ctx.fillStyle = "#888888";
@@ -44,17 +49,53 @@ class Enemy extends PhysicalBody {
         );
       },
       update: () => {
-        if (this.y - this.height / 2 > renderer.height) {
-          this.v.y = 0;
-          this.v.x = 0;
-          this.x = 30;
-          this.y = 30;
+
+        if (
+          this.animateFrames % this.animateDuration <
+          (this.animateDuration / this.animateSteps) * 1
+        ) {
+          this.image = images.enemy_slime_1;
+        } else if (
+          this.animateFrames % this.animateDuration <
+          (this.animateDuration / this.animateSteps) * 2
+        ) {
+          this.image = images.enemy_slime_2;
+        } else if (
+          this.animateFrames % this.animateDuration <
+          (this.animateDuration / this.animateSteps) * 3
+        ) {
+          this.image = images.enemy_slime_3;
+        } else if (
+          this.animateFrames % this.animateDuration <
+          (this.animateDuration / this.animateSteps) * 4
+        ) {
+          this.image = images.enemy_slime_4;
+        } else if (
+          this.animateFrames % this.animateDuration <
+          (this.animateDuration / this.animateSteps) * 5
+        ) {
+          this.image = images.enemy_slime_5;
+        } else if (
+          this.animateFrames % this.animateDuration <
+          (this.animateDuration / this.animateSteps) * 6
+        ) {
+          this.image = images.enemy_slime_6;
+        } else if (this.animateFrames % this.animateDuration < this.animateDuration / this.animateSteps * 7) {
+          this.image = images.enemy_slime_7;
+        } else {
+          this.image = images.enemy_slime_8;
         }
+
+        this.animateFrames++;
       },
     });
 
     this.maxHealth = maxHealth;
     this.health = this.maxHealth;
+
+    this.animateFrames = 0;
+		this.animateDuration = 60;
+		this.animateSteps = 8;
   }
 
   takeDamage(damage = 1) {
