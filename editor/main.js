@@ -165,7 +165,7 @@ loadImages(images, (loaded, total) => {
   document.querySelector(".loading").style.width =
     ((loaded / total) * 100).toString() + "%";
 })
-  .then((imgs) => {
+  .then(imgs => {
     images = imgs;
     return generateWorld(worldSize, compressionFactor);
   })
@@ -205,7 +205,21 @@ loadImages(images, (loaded, total) => {
       new Enemy({ x: 600, y: 0, mass: 3, maxHealth: 100, width: 60, height: 60 }),
     ];
 
-    enemies.forEach((enemy) => renderer.add(enemy));
+    enemies.forEach(enemy => renderer.add(enemy));
+
+    const mapWidth = worldSize / compressionFactor;
+    const mapHeight = mapWidth;
+    const mapImage = renderer.ctx.createImageData(mapWidth, mapHeight);
+    const imageData = mapImage.data;
+    for (let x = 0; x < mapWidth; x++) {
+      for (let y = 0; y < mapHeight; y++) {
+        const value = map[x + y * mapWidth];
+
+        const cell = (x + y * mapWidth) * 4;
+        imageData[cell] = imageData[cell + 1] = imageData[cell + 2] = value ? 0 : 255;
+        imageData[cell + 3] = 255;
+      }
+    }
 
     const mapWidth = worldSize / compressionFactor;
     const mapHeight = mapWidth;
@@ -281,7 +295,7 @@ loadImages(images, (loaded, total) => {
      * @param {number} time
      * @returns
      */
-    const animationLoop = (time) => {
+    const animationLoop = time => {
       const timeDiff = time - lastUpdateTime;
       lastUpdateTime = time;
       const multiplier = timeDiff / msPerFrame;
@@ -492,8 +506,7 @@ loadImages(images, (loaded, total) => {
 
               if (
                 renderer.objects.filter(
-                  (object) =>
-                    object._randomId !== player._randomId && object.collides(big)
+                  object => object._randomId !== player._randomId && object.collides(big)
                 ).length > 0
               )
                 break;
@@ -560,4 +573,4 @@ loadImages(images, (loaded, total) => {
 
     const getSelected = initEditor(images);
   })
-  .catch((e) => console.error(e));
+  .catch(e => console.error(e));
