@@ -221,20 +221,6 @@ loadImages(images, (loaded, total) => {
       }
     }
 
-    const mapWidth = worldSize / compressionFactor;
-    const mapHeight = mapWidth;
-    const mapImage = renderer.ctx.createImageData(mapWidth, mapHeight);
-    const imageData = mapImage.data;
-    for (let x = 0; x < mapWidth; x++) {
-      for (let y = 0; y < mapHeight; y++) {
-        const value = map[x + y * mapWidth];
-
-        const cell = (x + y * mapWidth) * 4;
-        imageData[cell] = imageData[cell + 1] = imageData[cell + 2] = value ? 0 : 255;
-        imageData[cell + 3] = 255;
-      }
-    }
-
     const fps = 60;
     const msPerFrame = 1000 / fps;
     let lastUpdateTime = performance.now();
