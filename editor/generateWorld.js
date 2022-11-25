@@ -8,26 +8,42 @@ worker.addEventListener("error", ({ message, lineno, colno }) => {
   );
 });
 
-const generateWorld = (size = 4000) =>
+const generateWorld = (size = 4000, compressionFactor = 2) =>
   new Promise((resolve, reject) => {
     try {
+      const finalData = [];
+
       worker.addEventListener("message", async ({ data }) => {
         if (data.type === "progress") {
           loadingBar.style.width = (data.value * 100).toString() + "%";
           loadingStatus.innerHTML =
             data.job === "generate"
-              ? "Generating world..."
+              ? "Terraforming world..."
               : data.job === "condense"
-              ? "Compressing world..."
-              : "Processing world...";
+              ? "Freezing water..."
+              : data.job === "process"
+              ? "Feeding penguin..."
+              : data.job === "load"
+              ? "Evolving enemies..."
+              : "Not sure...";
+          if (data.job === "load") {
+            finalData.splice(data.index, data.data.length, ...data.data);
+          }
         } else if (data.type === "complete") {
-          resolve(data.value);
+          try {
+            window.data = finalData;
+            resolve(finalData);
+          } catch (e) {
+            console.error(e);
+          }
         } else if (data.type === "error") {
           console.error(data.value);
+        } else if (data.type === "log") {
+          console.log(...data.value);
         }
       });
 
-      worker.postMessage([size, size]);
+      worker.postMessage([size, size, compressionFactor]);
     } catch (e) {
       reject(e);
     }

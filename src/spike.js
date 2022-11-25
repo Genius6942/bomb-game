@@ -25,7 +25,8 @@ class Spike extends StaticBody {
       y: y * blockSize + blockSize / 2,
       width: blockSize,
       height: blockSize,
-      image: getImageName(dir),
+      image: images[getImageName(dir)],
+			layer: 1,
       onCollide: (object) => {
         if (triangleRectIntersection(this.getVertices(), player)) {
           player.takeDamage(Infinity);

@@ -4,13 +4,13 @@ class Player extends ControlledBody {
    * @param {number?} options.health
    * @param {{[key: string]: HTMLImageElement}?} options.images
    */
-  constructor({ health = 100, images = {} }) {
+  constructor({ health = 100 }) {
     super({
       x: 30,
       y: 30,
       width: 30,
       height: 30,
-      layer: 1,
+      layer: 2,
       image: images.player_walk_1,
       wallJump: true,
       jumpVel: 15.5,
@@ -19,6 +19,15 @@ class Player extends ControlledBody {
         if (this.dir === 0) {
           ctx.scale(-1, 1);
         }
+        const bombWidth = 20;
+        const bombHeight = 20;
+        ctx.drawImage(
+          images.bomb,
+          -this.width / 2 - bombWidth / 2 + 3,
+          -this.height / 2 + 2,
+          bombWidth,
+          bombHeight
+        );
         ctx.drawImage(
           this.image,
           -this.width / 2,
@@ -45,11 +54,17 @@ class Player extends ControlledBody {
           this.jumpFrames++;
         } else {
           this.jumpFrames = 0;
-          if (this.walkFrames % 20 < 5) {
+          if ((this.walkFrames % this.framesPerStep) * 4 < this.framesPerStep * 1) {
             this.image = images.player_walk_1;
-          } else if (this.walkFrames % 20 < 10) {
+          } else if (
+            (this.walkFrames % this.framesPerStep) * 4 <
+            this.framesPerStep * 2
+          ) {
             this.image = images.player_walk_2;
-          } else if (this.walkFrames % 20 < 15) {
+          } else if (
+            (this.walkFrames % this.framesPerStep) * 4 <
+            this.framesPerStep * 3
+          ) {
             this.image = images.player_walk_3;
           } else {
             this.image = images.player_walk_4;
@@ -62,6 +77,7 @@ class Player extends ControlledBody {
 
     this.jumpFrames = 0;
     this.walkFrames = 0;
+    this.framesPerStep = 15;
     this.dir = 1;
 
     this.maxHealth = health;
@@ -69,6 +85,8 @@ class Player extends ControlledBody {
     this.displayedHealth = this.health;
 
     this.startPos = { x: this.x, y: this.y };
+
+    this.weapon = "bomb";
   }
 
   /**

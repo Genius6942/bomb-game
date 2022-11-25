@@ -7,6 +7,7 @@ class Enemy extends PhysicalBody {
       height,
       image: images.enemy_slime_1,
       mass,
+			layer: 1,
       render: (ctx) => {
         ctx.drawImage(
           this.image,

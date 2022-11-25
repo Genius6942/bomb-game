@@ -66,6 +66,7 @@ class Bomb extends PhysicalBody {
       y,
       width: 20,
       height: 20,
+			layer: 1,
       image: images.bomb_1,
       render: (ctx) => {
         ctx.drawImage(

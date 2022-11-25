@@ -23,8 +23,8 @@
       canvas {
         /* border-radius: 30px;  Border radiuses don't seem to work with putImageData */
         box-shadow: 0 0 10px #777;
-        /* width: 1024px;
-        height: 768px; */
+        width: 1024px;
+        height: 768px;
       }
       body {
         background-color: #eee;
@@ -205,13 +205,15 @@
 
       const size = 4000;
 
+      const compressed = size / 2;
+
       const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
       const renderNoise = async (noiseData, onProgress = (loaded, total) => {}) => {
         loadingStatus.innerHTML = "Rendering world...";
         const canvas = document.getElementsByTagName("canvas")[0];
-        canvas.width = size;
-        canvas.height = size;
+        canvas.width = compressed;
+        canvas.height = compressed;
 
         const ctx = canvas.getContext("2d");
 
@@ -219,20 +221,18 @@
         const data = image.data;
 
         const start = Date.now();
-        const updateStepCount = Math.floor(size / 100);
+        const updateStepCount = Math.floor(compressed / 100);
 
         for (let x = 0; x < canvas.width; x++) {
           if (x % updateStepCount === 0) {
-            onProgress(x, size);
+            onProgress(x, compressed);
             await sleep(10);
           }
           for (let y = 0; y < canvas.height; y++) {
-            let value = noiseData[x + y * size];
+            let value = noiseData[x + y * compressed];
             if (!value) continue;
-            value *= 256;
-            var cell = (x + y * canvas.width) * 4;
-            data[cell] = data[cell + 1] = data[cell + 2] = value;
-            data[cell] += Math.max(0, (25 - value) * 8);
+            const cell = (x + y * canvas.width) * 4;
+            data[cell] = data[cell + 1] = data[cell + 2] = 0;
             data[cell + 3] = 255; // alpha.
           }
         }
@@ -256,7 +256,7 @@
         );
       });
 
-      const finalData = [];
+      const finalData = Array(compressed * compressed);
 
       (async () => {
         worker.addEventListener("message", async ({ data }) => {
@@ -270,21 +270,17 @@
                 : data.job === "process"
                 ? "Processing world..."
                 : data.job === "load"
-                ? "Verifying file intergity..."
+                ? "Loading world..."
                 : "Finishing up...";
-            if (data.job === "load") {
-              finalData.push(...data.value);
-            }
           } else if (data.type === "complete") {
             console.log("complete");
-            await sleep(1000);
             try {
               await renderNoise(
                 finalData,
                 (loaded, total) =>
                   (loadingBar.style.width = ((loaded / total) * 100).toString() + "%")
               );
-              window.data = finalData;
+              // window.data = finalData;
               loadingBar.parentElement.parentElement.style.display = "none";
             } catch (e) {
               console.error(e);
@@ -301,7 +297,7 @@
             (loadingBar.style.width = ((loaded / total) * 100).toString() + "%")
         );
 
-        worker.postMessage([size, size]);
+        worker.postMessage([size, size, 2]);
       })();
     </script>
   </body>

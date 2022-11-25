@@ -54,6 +54,9 @@ let enemies = [];
 
 const pixelated = false;
 
+const compressionFactor = 4;
+const worldSize = 4000;
+
 /**
  * array of all the different elements in the level.
  * @type {{x: number, y: number, img: string, type: string}[]}
@@ -144,6 +147,7 @@ let images = {
   bomb_8: "/img/bomb/bomb_8.png",
   bomb_9: "/img/bomb/bomb_9.png",
   bomb_10: "/img/bomb/bomb_10.png",
+  bomb: "/img/bomb/bomb.png",
 
   // spikes
   spike_left: "/img/spike/spike_left.png",
@@ -163,7 +167,7 @@ loadImages(images, (loaded, total) => {
 })
   .then((imgs) => {
     images = imgs;
-    return generateWorld(4000);
+    return generateWorld(worldSize, compressionFactor);
   })
   .then((map) => {
     // create a new joystick instance
@@ -196,20 +200,26 @@ loadImages(images, (loaded, total) => {
     // enable keyboard controls
     player.bindKeyboardControls({});
 
-    // create a body for the player to land / jump on
-    renderer.add(
-      new StaticBody({ x: 0, y: 500, width: 300, height: 100, color: "black" })
-    );
-    renderer.add(
-      new StaticBody({ x: 500, y: 700, width: 300, height: 100, color: "black" })
-    );
-
     enemies = [
       new Enemy({ x: 500, y: 0 }),
       new Enemy({ x: 600, y: 0, mass: 3, maxHealth: 100, width: 60, height: 60 }),
     ];
 
     enemies.forEach((enemy) => renderer.add(enemy));
+
+    const mapWidth = worldSize / compressionFactor;
+    const mapHeight = mapWidth;
+    const mapImage = renderer.ctx.createImageData(mapWidth, mapHeight);
+    const imageData = mapImage.data;
+    for (let x = 0; x < mapWidth; x++) {
+      for (let y = 0; y < mapHeight; y++) {
+        const value = map[x + y * mapWidth];
+
+        const cell = (x + y * mapWidth) * 4;
+        imageData[cell] = imageData[cell + 1] = imageData[cell + 2] = value ? 0 : 255;
+        imageData[cell + 3] = 255;
+      }
+    }
 
     const fps = 60;
     const msPerFrame = 1000 / fps;
@@ -301,9 +311,7 @@ loadImages(images, (loaded, total) => {
       // ------ add correct blocks to renderer -------
       (() => {
         // step 1 - clear blocks
-        renderer.objects = renderer.objects.filter(
-          (object) => object.constructor.name !== "StaticBody"
-        );
+        renderer.objects = renderer.objects.filter((object) => !object.isGenerated);
         // step 2 - calculate boundaries
         const margin = blockSize * 3;
         const left = renderer.camera.pos.x - renderer.width / 2 - margin;
@@ -316,19 +324,36 @@ loadImages(images, (loaded, total) => {
         const blockRight = Math.round(right / blockSize);
         const blockBottom = Math.round(bottom / blockSize);
 
-        for (let x = Math.max(blockLeft, 0); x < Math.min(blockRight, 4000); x++) {
-          for (let y = Math.max(blockTop, 0); y < Math.min(blockBottom, 4000); y++) {
-            const val = map[x + y * 4000];
+        const gridSize = worldSize / compressionFactor;
+
+        for (let x = Math.max(blockLeft, 0); x < Math.min(blockRight, gridSize); x++) {
+          for (let y = Math.max(blockTop, 0); y < Math.min(blockBottom, gridSize); y++) {
+            const val = map[x + y * gridSize];
             if (!val) continue;
-            renderer.add(
-              new StaticBody({
-                x: x * blockSize + blockSize / 2,
-                y: y * blockSize + blockSize / 2,
-                width: blockSize,
-                height: blockSize,
-                image: images["block_ground_" + val.image],
-              })
-            );
+            let body;
+            if (val.image === "mid") {
+              body = renderer.add(
+                new GameObject({
+                  x: x * blockSize + blockSize / 2,
+                  y: y * blockSize + blockSize / 2,
+                  width: blockSize,
+                  height: blockSize,
+                  image: images["block_ground_" + val.image],
+                })
+              );
+            } else {
+              body = renderer.add(
+                new StaticBody({
+                  x: x * blockSize + blockSize / 2,
+                  y: y * blockSize + blockSize / 2,
+                  width: blockSize,
+                  height: blockSize,
+                  image: images["block_ground_" + val.image],
+                })
+              );
+            }
+
+            body.isGenerated = true;
           }
         }
       })();
@@ -339,6 +364,36 @@ loadImages(images, (loaded, total) => {
       renderer.render();
 
       const ctx = renderer.ctx;
+
+      (async () => {
+        // ----- draw map -----
+        const playerXOnMap = player.x / blockSize;
+        const playerYOnMap = player.y / blockSize;
+
+        const mapDimensions = {
+          width: 200,
+          height: 200,
+        };
+
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, mapDimensions.width, mapDimensions.height);
+
+        ctx.putImageData(
+          mapImage,
+          -playerXOnMap + mapDimensions.width / 2,
+          -playerYOnMap + mapDimensions.height / 2,
+          playerXOnMap - mapDimensions.width / 2,
+          playerYOnMap - mapDimensions.height / 2,
+          mapDimensions.width,
+          mapDimensions.height
+        );
+
+        // draw player on map
+        ctx.fillStyle = "blue";
+        ctx.beginPath();
+        ctx.arc(mapDimensions.width / 2, mapDimensions.height / 2, 5, 0, Math.PI * 2);
+        ctx.fill();
+      })();
 
       pointerLocked &&
         !mobile &&
